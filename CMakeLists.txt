@@ -10,16 +10,20 @@ find_package(OpenSSL REQUIRED)
 
 add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/config.h
     COMMAND               ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/autoconf
+    COMMAND               ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/config.guess
+                                                   ${CMAKE_CURRENT_BINARY_DIR}/autoconf/config.guess
+    COMMAND               ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/config.sub
+                                                   ${CMAKE_CURRENT_BINARY_DIR}/autoconf/config.sub
     COMMAND               ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/configure.in
                                                    ${CMAKE_CURRENT_BINARY_DIR}/autoconf/configure.in
+    COMMAND               ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/install-sh
+                                                   ${CMAKE_CURRENT_BINARY_DIR}/autoconf/install-sh
     COMMAND               ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/Makefile.in
                                                    ${CMAKE_CURRENT_BINARY_DIR}/autoconf/Makefile.in
     COMMAND               ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/version.h
                                                    ${CMAKE_CURRENT_BINARY_DIR}/autoconf/version.h
     COMMAND               ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_BINARY_DIR}/autoconf autoconf
     COMMAND               ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_BINARY_DIR}/autoconf sh ./configure CC=${CMAKE_C_COMPILER} CFLAGS=${CMAKE_C_FLAGS}
-    COMMAND               ${CMAKE_COMMAND} -E remove ${CMAKE_CURRENT_BINARY_DIR}/autoconf/version.h
-    COMMAND               ${CMAKE_COMMAND} -E remove ${CMAKE_CURRENT_BINARY_DIR}/autoconf/Makefile.in
     MAIN_DEPENDENCY       ${CMAKE_CURRENT_SOURCE_DIR}/configure.in
     DEPENDS               ${CMAKE_CURRENT_SOURCE_DIR}/Makefile.in
                           ${CMAKE_CURRENT_SOURCE_DIR}/version.h)
