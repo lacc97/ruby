@@ -12,7 +12,7 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/lex.h
     COMMAND               ${GPERF} -p -j1 -i 1 -g -o -t -N rb_reserved_word -k1,3,$$ --output-file=${CMAKE_CURRENT_BINARY_DIR}/lex.h ${CMAKE_CURRENT_SOURCE_DIR}/keywords
     MAIN_DEPENDENCY       ${CMAKE_CURRENT_SOURCE_DIR}/keywords)
 
-add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/config.h
+add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/autoconf/config.h
     COMMAND               ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/autoconf
     COMMAND               ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/config.guess
                                                    ${CMAKE_CURRENT_BINARY_DIR}/autoconf/config.guess
@@ -37,7 +37,7 @@ add_library(ruby STATIC
     ${CMAKE_CURRENT_SOURCE_DIR}/bignum.c
     ${CMAKE_CURRENT_SOURCE_DIR}/class.c
     ${CMAKE_CURRENT_SOURCE_DIR}/compar.c
-    ${CMAKE_CURRENT_BINARY_DIR}/config.h
+    ${CMAKE_CURRENT_BINARY_DIR}/autoconf/config.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dir.c
     ${CMAKE_CURRENT_SOURCE_DIR}/dln.c
     ${CMAKE_CURRENT_SOURCE_DIR}/dmyext.c
@@ -84,8 +84,8 @@ add_library(ruby STATIC
       INTERFACE
         ${CMAKE_CURRENT_BINARY_DIR}/include
       PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}
-        ${CMAKE_CURRENT_BINARY_DIR}/autoconf)
+        ${CMAKE_CURRENT_BINARY_DIR}/autoconf
+        ${CMAKE_CURRENT_SOURCE_DIR})
   target_bison_sources(ruby
       PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/parse.y)
@@ -107,24 +107,24 @@ add_custom_command(TARGET ruby POST_BUILD
     COMMAND               ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/intern.h
                                                    ${CMAKE_CURRENT_BINARY_DIR}/include/ruby/intern.h
     COMMAND               ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/missing.h
-                                                   ${CMAKE_CURRENT_BINARY_DIR}/include/ruby/missing.h
+    ${CMAKE_CURRENT_BINARY_DIR}/include/ruby/missing.h
     COMMAND               ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/node.h
-                                                   ${CMAKE_CURRENT_BINARY_DIR}/include/ruby/node.h
+    ${CMAKE_CURRENT_BINARY_DIR}/include/ruby/node.h
     COMMAND               ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/re.h
-                                                   ${CMAKE_CURRENT_BINARY_DIR}/include/ruby/re.h
+    ${CMAKE_CURRENT_BINARY_DIR}/include/ruby/re.h
     COMMAND               ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/regex.h
-                                                   ${CMAKE_CURRENT_BINARY_DIR}/include/ruby/regex.h
+    ${CMAKE_CURRENT_BINARY_DIR}/include/ruby/regex.h
     COMMAND               ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ruby.h
-                                                   ${CMAKE_CURRENT_BINARY_DIR}/include/ruby/ruby.h
+    ${CMAKE_CURRENT_BINARY_DIR}/include/ruby/ruby.h
     COMMAND               ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/rubyio.h
-                                                   ${CMAKE_CURRENT_BINARY_DIR}/include/ruby/rubyio.h
+    ${CMAKE_CURRENT_BINARY_DIR}/include/ruby/rubyio.h
     COMMAND               ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/rubysig.h
-                                                   ${CMAKE_CURRENT_BINARY_DIR}/include/ruby/sig.h
+    ${CMAKE_CURRENT_BINARY_DIR}/include/ruby/sig.h
     COMMAND               ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/st.h
-                                                   ${CMAKE_CURRENT_BINARY_DIR}/include/ruby/st.h
+    ${CMAKE_CURRENT_BINARY_DIR}/include/ruby/st.h
     COMMAND               ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/util.h
-                                                   ${CMAKE_CURRENT_BINARY_DIR}/include/ruby/util.h
+    ${CMAKE_CURRENT_BINARY_DIR}/include/ruby/util.h
     COMMAND               ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/version.h
-                                                   ${CMAKE_CURRENT_BINARY_DIR}/include/ruby/version.h
+    ${CMAKE_CURRENT_BINARY_DIR}/include/ruby/version.h
     COMMAND               ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ruby_top.h
-                                                   ${CMAKE_CURRENT_BINARY_DIR}/include/ruby.h)
+    ${CMAKE_CURRENT_BINARY_DIR}/include/ruby.h)
