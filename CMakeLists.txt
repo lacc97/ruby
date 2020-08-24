@@ -5,8 +5,12 @@ project(ruby C)
 include(cmake/FlexBison.cmake)
 
 
-find_package(OpenSSL REQUIRED)
+find_program(GPERF gperf REQUIRED)
 
+
+add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/lex.h
+    COMMAND               ${GPERF} -p -j1 -i 1 -g -o -t -N rb_reserved_word -k1,3,$$ --output-file=${CMAKE_CURRENT_BINARY_DIR}/lex.h ${CMAKE_CURRENT_SOURCE_DIR}/keywords
+    MAIN_DEPENDENCY       ${CMAKE_CURRENT_SOURCE_DIR}/keywords)
 
 add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/config.h
     COMMAND               ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/autoconf
@@ -46,6 +50,7 @@ add_library(ruby STATIC
     ${CMAKE_CURRENT_SOURCE_DIR}/hash.c
     ${CMAKE_CURRENT_SOURCE_DIR}/inits.c
     ${CMAKE_CURRENT_SOURCE_DIR}/io.c
+    ${CMAKE_CURRENT_BINARY_DIR}/lex.h
     ${CMAKE_CURRENT_SOURCE_DIR}/marshal.c
     ${CMAKE_CURRENT_SOURCE_DIR}/math.c
     ${CMAKE_CURRENT_SOURCE_DIR}/numeric.c

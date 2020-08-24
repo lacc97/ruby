@@ -3425,7 +3425,7 @@ here_document(here)
     return tSTRING_CONTENT;
 }
 
-#include "lex.c"
+#include "lex.h"
 
 static void
 arg_ambiguous()
