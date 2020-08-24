@@ -92,7 +92,7 @@ add_library(ruby STATIC
   target_link_libraries(ruby
       PRIVATE
         ${CMAKE_DL_LIBS}
-        OpenSSL::Crypto)
+        crypt)
 
 add_custom_command(TARGET ruby POST_BUILD
     COMMAND               ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/include/ruby
