@@ -85,6 +85,7 @@ add_library(ruby STATIC
         ${CMAKE_CURRENT_BINARY_DIR}/include
       PRIVATE
         ${CMAKE_CURRENT_BINARY_DIR}/autoconf
+        ${CMAKE_CURRENT_BINARY_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR})
   target_bison_sources(ruby
       PRIVATE
