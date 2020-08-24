@@ -8,6 +8,9 @@ include(cmake/FlexBison.cmake)
 find_program(GPERF gperf REQUIRED)
 
 
+set(RUBY_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/autoconf)
+
+
 add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/lex.h
     COMMAND               ${GPERF} -p -j1 -i 1 -g -o -t -N rb_reserved_word -k1,3,$$ --output-file=${CMAKE_CURRENT_BINARY_DIR}/lex.h ${CMAKE_CURRENT_SOURCE_DIR}/keywords
     MAIN_DEPENDENCY       ${CMAKE_CURRENT_SOURCE_DIR}/keywords)
@@ -84,9 +87,8 @@ add_library(ruby STATIC
       INTERFACE
         ${CMAKE_CURRENT_BINARY_DIR}/include
       PRIVATE
-        ${CMAKE_CURRENT_BINARY_DIR}/autoconf
-        ${CMAKE_CURRENT_BINARY_DIR}
-        ${CMAKE_CURRENT_SOURCE_DIR})
+        ${RUBY_INCLUDE_DIRS}
+        ${CMAKE_CURRENT_BINARY_DIR})
   target_bison_sources(ruby
       PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/parse.y)
@@ -129,3 +131,5 @@ add_custom_command(TARGET ruby POST_BUILD
     ${CMAKE_CURRENT_BINARY_DIR}/include/ruby/version.h
     COMMAND               ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ruby_top.h
     ${CMAKE_CURRENT_BINARY_DIR}/include/ruby.h)
+
+add_subdirectory(ext)

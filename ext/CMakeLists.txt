@@ -1,0 +1,15 @@
+add_library(ruby-ext STATIC "")
+  target_include_directories(ruby-ext PRIVATE ${RUBY_INCLUDE_DIRS})
+
+target_link_libraries(ruby PRIVATE ruby-ext)
+
+add_subdirectory(bigdecimal)
+add_subdirectory(digest)
+add_subdirectory(etc)
+add_subdirectory(fcntl)
+add_subdirectory(iconv)
+add_subdirectory(racc)
+add_subdirectory(stringio)
+add_subdirectory(strscan)
+add_subdirectory(thread)
+add_subdirectory(zlib)
