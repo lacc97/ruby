@@ -1,5 +1,5 @@
 add_library(ruby-ext STATIC "")
-  target_include_directories(ruby-ext PRIVATE ${RUBY_INCLUDE_DIRS})
+  target_link_libraries(ruby-ext PRIVATE ruby-headers)
 
 target_link_libraries(ruby PRIVATE ruby-ext)
 
