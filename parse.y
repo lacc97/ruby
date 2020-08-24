@@ -6341,7 +6341,7 @@ parser_here_document(struct parser_params *parser, NODE *here)
     return tSTRING_CONTENT;
 }
 
-#include "lex.c"
+#include "lex.h"
 
 static void
 arg_ambiguous_gen(struct parser_params *parser)
