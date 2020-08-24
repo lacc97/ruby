@@ -14,7 +14,9 @@ add_library(ruby-ext-digest STATIC
     ${CMAKE_CURRENT_SOURCE_DIR}/sha2/sha2init.c)
   target_include_directories(ruby-ext-digest
       PRIVATE
-        ${RUBY_INCLUDE_DIRS}
         ${CMAKE_CURRENT_SOURCE_DIR})
+  target_link_libraries(ruby-ext-digest
+      PRIVATE
+        ruby-headers)
 
 target_link_libraries(ruby-ext PRIVATE ruby-ext-digest)
