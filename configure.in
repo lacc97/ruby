@@ -3008,7 +3008,7 @@ else
 fi
 AC_SUBST(USE_RUBYGEMS)
 
-arch_hdrdir="${EXTOUT}/include/${arch}/ruby"
+arch_hdrdir="include/ruby"
 AS_MKDIR_P("${arch_hdrdir}")
 config_h="${arch_hdrdir}/config.h"
 guard=INCLUDE_RUBY_CONFIG_H
