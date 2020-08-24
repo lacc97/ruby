@@ -36,6 +36,7 @@ add_library(ruby STATIC
     ${CMAKE_CURRENT_BINARY_DIR}/config.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dir.c
     ${CMAKE_CURRENT_SOURCE_DIR}/dln.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/dmyext.c
     ${CMAKE_CURRENT_SOURCE_DIR}/enum.c
     ${CMAKE_CURRENT_SOURCE_DIR}/enumerator.c
     ${CMAKE_CURRENT_SOURCE_DIR}/error.c
@@ -46,6 +47,8 @@ add_library(ruby STATIC
     ${CMAKE_CURRENT_SOURCE_DIR}/inits.c
     ${CMAKE_CURRENT_SOURCE_DIR}/io.c
     ${CMAKE_CURRENT_SOURCE_DIR}/marshal.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/math.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/numeric.c
     ${CMAKE_CURRENT_SOURCE_DIR}/object.c
     ${CMAKE_CURRENT_SOURCE_DIR}/pack.c
     ${CMAKE_CURRENT_SOURCE_DIR}/process.c
@@ -69,6 +72,9 @@ add_library(ruby STATIC
 #  target_compile_definitions(ruby
 #      PRIVATE
 #        _GNU_SOURCE=1)
+  target_compile_features(ruby
+      PRIVATE
+        c_std_99)
   target_include_directories(ruby
       INTERFACE
         ${CMAKE_CURRENT_BINARY_DIR}/include
