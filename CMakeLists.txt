@@ -70,7 +70,9 @@ add_library(ruby STATIC
 #      PRIVATE
 #        _GNU_SOURCE=1)
   target_include_directories(ruby
-      PUBLIC
+      INTERFACE
+        ${CMAKE_CURRENT_BINARY_DIR}/include
+      PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_BINARY_DIR}/autoconf)
   target_bison_sources(ruby
@@ -79,3 +81,38 @@ add_library(ruby STATIC
   target_link_libraries(ruby
       PRIVATE
         OpenSSL::Crypto)
+
+add_custom_command(TARGET ruby POST_BUILD
+    COMMAND               ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/include/ruby
+    COMMAND               ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/autoconf/config.h
+                                                   ${CMAKE_CURRENT_BINARY_DIR}/include/ruby/config.h
+    COMMAND               ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/defines.h
+                                                   ${CMAKE_CURRENT_BINARY_DIR}/include/ruby/defines.h
+    COMMAND               ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/dln.h
+                                                   ${CMAKE_CURRENT_BINARY_DIR}/include/ruby/dln.h
+    COMMAND               ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/env.h
+                                                   ${CMAKE_CURRENT_BINARY_DIR}/include/ruby/env.h
+    COMMAND               ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/intern.h
+                                                   ${CMAKE_CURRENT_BINARY_DIR}/include/ruby/intern.h
+    COMMAND               ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/missing.h
+                                                   ${CMAKE_CURRENT_BINARY_DIR}/include/ruby/missing.h
+    COMMAND               ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/node.h
+                                                   ${CMAKE_CURRENT_BINARY_DIR}/include/ruby/node.h
+    COMMAND               ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/re.h
+                                                   ${CMAKE_CURRENT_BINARY_DIR}/include/ruby/re.h
+    COMMAND               ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/regex.h
+                                                   ${CMAKE_CURRENT_BINARY_DIR}/include/ruby/regex.h
+    COMMAND               ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ruby.h
+                                                   ${CMAKE_CURRENT_BINARY_DIR}/include/ruby/ruby.h
+    COMMAND               ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/rubyio.h
+                                                   ${CMAKE_CURRENT_BINARY_DIR}/include/ruby/rubyio.h
+    COMMAND               ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/rubysig.h
+                                                   ${CMAKE_CURRENT_BINARY_DIR}/include/ruby/sig.h
+    COMMAND               ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/st.h
+                                                   ${CMAKE_CURRENT_BINARY_DIR}/include/ruby/st.h
+    COMMAND               ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/util.h
+                                                   ${CMAKE_CURRENT_BINARY_DIR}/include/ruby/util.h
+    COMMAND               ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/version.h
+                                                   ${CMAKE_CURRENT_BINARY_DIR}/include/ruby/version.h
+    COMMAND               ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ruby_top.h
+                                                   ${CMAKE_CURRENT_BINARY_DIR}/include/ruby.h)
