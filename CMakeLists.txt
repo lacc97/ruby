@@ -80,6 +80,7 @@ add_library(ruby STATIC
         ${CMAKE_CURRENT_SOURCE_DIR}/parse.y)
   target_link_libraries(ruby
       PRIVATE
+        ${CMAKE_DL_LIBS}
         OpenSSL::Crypto)
 
 add_custom_command(TARGET ruby POST_BUILD
