@@ -1,0 +1,4 @@
+target_sources(ruby-ext
+    PRIVATE
+      ${CMAKE_CURRENT_SOURCE_DIR}/complex/complex.c
+      ${CMAKE_CURRENT_SOURCE_DIR}/rational/rational.c)
