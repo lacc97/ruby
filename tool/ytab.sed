@@ -13,6 +13,7 @@ a\
 }
 /^yydestruct.*yymsg/,/#endif/{
   /^yydestruct/{
+    /,$/N
     /parser/!{
       h
       s/^/ruby_parser_&/

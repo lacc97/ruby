@@ -9461,7 +9461,7 @@ reg_named_capture_assign_iter(const OnigUChar *name, const OnigUChar *name_end,
     }
 
     if (!len || (*name != '_' && ISASCII(*name) && !rb_enc_islower(*name, enc)) ||
-	(len < MAX_WORD_LENGTH && rb_reserved_word(s, (int)len)) ||
+	(len < MAX_WORD_LENGTH && rb_reserved_word(s, len)) ||
 	!rb_enc_symname2_p(s, len, enc)) {
         return ST_CONTINUE;
     }
@@ -10282,7 +10282,7 @@ rb_data_type_t parser_data_type = {
 #undef rb_reserved_word
 
 const struct kwtable *
-rb_reserved_word(const char *str, unsigned int len)
+rb_reserved_word(const char *str, size_t len)
 {
     return reserved_word(str, len);
 }

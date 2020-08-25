@@ -107,8 +107,8 @@ function(target_rb_parse_source target _parseY)
 
   add_custom_command(OUTPUT ${_outFileSrc} ${_outFileHdr}
       COMMAND               ${CMAKE_COMMAND} -E make_directory ${_outDir}
-      COMMAND               ${BISON_EXECUTABLE} --name-prefix=${_inBaseFile}_ --defines=${_outFileHdr} --output=${_outFileSrc} ${_inAbsFile}
-      COMMAND               sed -f ${CMAKE_CURRENT_SOURCE_DIR}/tool/ytab.sed ${_outFileSrc} > ${_outFileSrc}
+      COMMAND               ${BISON_EXECUTABLE} --defines=${_outFileHdr} --output=${_outFileSrc} ${_inAbsFile}
+      COMMAND               sed -i -f ${CMAKE_CURRENT_SOURCE_DIR}/tool/ytab.sed ${_outFileSrc}
       MAIN_DEPENDENCY       ${_inAbsFile}
       DEPENDS               ${CMAKE_CURRENT_SOURCE_DIR}/tool/ytab.sed
       COMMENT               "Generating bison parser from ${_inFile}")

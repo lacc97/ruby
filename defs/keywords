@@ -1,8 +1,8 @@
 %{
 struct kwtable {const char *name; int id[2]; enum lex_state_e state;};
-const struct kwtable *rb_reserved_word(const char *, unsigned int);
+const struct kwtable *rb_reserved_word(const char *, size_t);
 #ifndef RIPPER
-static const struct kwtable *reserved_word(const char *, unsigned int);
+static const struct kwtable *reserved_word(const char *, size_t);
 #define rb_reserved_word(str, len) reserved_word(str, len)
 %}
 

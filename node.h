@@ -482,7 +482,7 @@ struct rb_global_entry *rb_global_entry(ID);
 VALUE rb_gvar_get(struct rb_global_entry *);
 VALUE rb_gvar_set(struct rb_global_entry *, VALUE);
 VALUE rb_gvar_defined(struct rb_global_entry *);
-const struct kwtable *rb_reserved_word(const char *, unsigned int);
+const struct kwtable *rb_reserved_word(const char *, size_t);
 
 struct parser_params;
 void *rb_parser_malloc(struct parser_params *, size_t);

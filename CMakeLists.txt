@@ -123,7 +123,8 @@ add_library(ruby STATIC
         c_std_99)
   target_include_directories(ruby
       PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR})
+        ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_CURRENT_BINARY_DIR})
   target_rb_parse_source(ruby ${CMAKE_CURRENT_SOURCE_DIR}/parse.y)
   target_rb_erb_source(ruby PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/template/id.h.tmpl
       ARGS    --vpath=${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/ruby.dir/bison
