@@ -138,8 +138,9 @@ add_library(ruby STATIC
         ${CMAKE_CURRENT_SOURCE_DIR}/template/vm.inc.tmpl)
   target_rb_node_name(ruby ${CMAKE_CURRENT_SOURCE_DIR}/node.h)
   target_link_libraries(ruby
-      PRIVATE
+      PUBLIC
         ruby-headers
+      PRIVATE
         ${CMAKE_DL_LIBS}
         crypt)
 
