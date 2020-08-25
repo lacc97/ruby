@@ -5,7 +5,10 @@ project(ruby C)
 include(cmake/RubyBootstrap.cmake)
 
 
+find_package(PkgConfig REQUIRED)
 find_package(Threads REQUIRED)
+
+pkg_check_modules(BSD REQUIRED IMPORTED_TARGET libbsd)
 
 find_program(GPERF gperf REQUIRED)
 
@@ -145,6 +148,7 @@ add_library(ruby STATIC
       PRIVATE
         Threads::Threads
         ${CMAKE_DL_LIBS}
-        crypt)
+        crypt
+        PkgConfig::BSD)
 
 add_subdirectory(ext)
