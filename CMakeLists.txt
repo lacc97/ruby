@@ -5,6 +5,8 @@ project(ruby C)
 include(cmake/RubyBootstrap.cmake)
 
 
+find_package(Threads REQUIRED)
+
 find_program(GPERF gperf REQUIRED)
 
 
@@ -141,6 +143,7 @@ add_library(ruby STATIC
       PUBLIC
         ruby-headers
       PRIVATE
+        Threads::Threads
         ${CMAKE_DL_LIBS}
         crypt)
 
