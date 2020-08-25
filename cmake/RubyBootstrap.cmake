@@ -115,3 +115,66 @@ function(target_rb_parse_source target _parseY)
   target_include_directories(${target} PRIVATE ${_outDir})
   target_sources(${target} PRIVATE ${_outFileSrc} ${_outFileHdr})
 endfunction()
+
+function(target_rb_prelude_source target _prelude)
+  cmake_parse_arguments(PRELUDE "" "" "SCRIPTS" ${ARGN})
+
+  if(PRELUDE_KEYWORDS_MISSING_VALUES)
+    message(FATAL_ERROR "Must provide prelude scripts (with SCRIPTS)")
+  endif()
+
+  set(MINIRUBY_COMMAND ${RUBY_EXE} -I${CMAKE_CURRENT_SOURCE_DIR})
+  set(COMPILE_PRELUDE_COMMAND ${MINIRUBY_COMMAND} -I${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/tool/compile_prelude.rb)
+
+  set(_outDir     ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${target}.dir/prelude)
+  set(_outFile    ${_outDir}/${_prelude}.c)
+
+  add_custom_command(OUTPUT ${_outFile}
+      COMMAND               ${CMAKE_COMMAND} -E make_directory ${_outDir}
+      COMMAND               ${COMPILE_PRELUDE_COMMAND} ${PRELUDE_SCRIPTS} ${_outFile}
+      DEPENDS               ${PROJECT_SOURCE_DIR}/tool/compile_prelude.rb
+                            ${PRELUDE_SCRIPTS}
+      COMMENT               "Generating prelude ${_prelude}.c")
+  target_include_directories(${target} PRIVATE ${_outDir})
+  target_sources(${target} PRIVATE ${_outFile})
+endfunction()
+
+function(target_rb_transcode_sources target)
+  cmake_parse_arguments(TRANSCODE "" "" "PRIVATE;PUBLIC;INTERFACE" ${ARGN})
+
+  if(TRANSCODE_KEYWORDS_MISSING_VALUES)
+    message(FATAL_ERROR "Must provide sources with some scope (PRIVATE, PUBLIC, INTERFACE)")
+  endif()
+
+  set(_outDir     ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${target}.dir/transcode)
+
+  # We process the source
+  function(add_transcode_source _scope _in)
+    get_filename_component(_inAbsFile  ${_in} ABSOLUTE)
+    get_filename_component(_inFile     ${_in} NAME)
+    string(REGEX REPLACE ".trans$" "" _inBaseFile ${_inFile})
+
+    set(_outFile ${_outDir}/${_inBaseFile}.c)
+
+    add_custom_command(OUTPUT ${_outFile}
+        COMMAND               ${CMAKE_COMMAND} -E make_directory ${_outDir}
+        COMMAND               ${RUBY_EXE} ${PROJECT_SOURCE_DIR}/tool/transcode-tblgen.rb -vo ${_outFile} ${_inAbsFile}
+        MAIN_DEPENDENCY       ${_inAbsFile}
+        DEPENDS               ${PROJECT_SOURCE_DIR}/tool/transcode-tblgen.rb
+        COMMENT               "Generating transcode table ${_inBaseFile}.c")
+    target_include_directories(${target} ${_scope} ${_outDir})
+    target_sources(${target} ${_scope} ${_outFile})
+  endfunction()
+
+  foreach(_in ${TRANSCODE_PRIVATE})
+    add_transcode_source(PRIVATE ${_in})
+  endforeach()
+
+  foreach(_in ${TRANSCODE_PUBLIC})
+    add_transcode_source(PUBLIC ${_in})
+  endforeach()
+
+  foreach(_in ${TRANSCODE_INTERFACE})
+    add_transcode_source(INTERFACE ${_in})
+  endforeach()
+endfunction()

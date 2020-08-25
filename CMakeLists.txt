@@ -54,6 +54,7 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/lex.h
     MAIN_DEPENDENCY       ${CMAKE_CURRENT_SOURCE_DIR}/defs/keywords)
 
 add_library(ruby STATIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/addr2line.c
     ${CMAKE_CURRENT_SOURCE_DIR}/array.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bignum.c
     ${CMAKE_CURRENT_SOURCE_DIR}/class.c
@@ -63,11 +64,12 @@ add_library(ruby STATIC
     ${CMAKE_CURRENT_SOURCE_DIR}/cont.c
     ${CMAKE_CURRENT_SOURCE_DIR}/dir.c
     ${CMAKE_CURRENT_SOURCE_DIR}/debug.c
-#    ${CMAKE_CURRENT_SOURCE_DIR}/dln.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/dln.c
     ${CMAKE_CURRENT_SOURCE_DIR}/dln_find.c
+#    ${CMAKE_CURRENT_SOURCE_DIR}/dmyencoding.c
     ${CMAKE_CURRENT_SOURCE_DIR}/dmyext.c
-#    ${CMAKE_CURRENT_SOURCE_DIR}/dmyversion.c
-#    ${CMAKE_CURRENT_SOURCE_DIR}/encoding.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/dmyversion.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/encoding.c
     ${CMAKE_CURRENT_SOURCE_DIR}/enum.c
     ${CMAKE_CURRENT_SOURCE_DIR}/enumerator.c
     ${CMAKE_CURRENT_SOURCE_DIR}/error.c
@@ -101,6 +103,7 @@ add_library(ruby STATIC
     ${CMAKE_CURRENT_SOURCE_DIR}/regparse.c
     ${CMAKE_CURRENT_SOURCE_DIR}/regsyntax.c
     ${CMAKE_CURRENT_SOURCE_DIR}/ruby.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/safe.c
     ${CMAKE_CURRENT_SOURCE_DIR}/signal.c
     ${CMAKE_CURRENT_SOURCE_DIR}/sprintf.c
     ${CMAKE_CURRENT_SOURCE_DIR}/st.c
@@ -118,7 +121,8 @@ add_library(ruby STATIC
       C_VISIBILITY_PRESET     "hidden")
   target_compile_definitions(ruby
       PRIVATE
-        RUBY_EXPORT)
+        RUBY_EXPORT
+        RUBY_REVISION=0)
   target_compile_features(ruby
       PRIVATE
         c_std_99)
@@ -144,6 +148,8 @@ add_library(ruby STATIC
         ${CMAKE_CURRENT_SOURCE_DIR}/template/vmtc.inc.tmpl
         ${CMAKE_CURRENT_SOURCE_DIR}/template/vm.inc.tmpl)
   target_rb_node_name(ruby ${CMAKE_CURRENT_SOURCE_DIR}/node.h)
+  target_rb_prelude_source(ruby prelude
+      SCRIPTS   ${CMAKE_CURRENT_SOURCE_DIR}/prelude.rb ${CMAKE_CURRENT_SOURCE_DIR}/enc/prelude.rb)
   target_link_libraries(ruby
       PUBLIC
         ruby-headers
@@ -153,4 +159,9 @@ add_library(ruby STATIC
         crypt
         PkgConfig::BSD)
 
+add_executable(ruby-exe ${CMAKE_CURRENT_SOURCE_DIR}/main.c)
+  target_link_libraries(ruby-exe PRIVATE ruby m)
+
+add_subdirectory(enc)
 add_subdirectory(ext)
+add_subdirectory(missing)
