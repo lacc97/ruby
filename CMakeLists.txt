@@ -92,6 +92,7 @@ add_library(ruby STATIC
     ${CMAKE_CURRENT_SOURCE_DIR}/process.c
     ${CMAKE_CURRENT_SOURCE_DIR}/random.c
     ${CMAKE_CURRENT_SOURCE_DIR}/range.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/rational.c
     ${CMAKE_CURRENT_SOURCE_DIR}/re.c
     ${CMAKE_CURRENT_SOURCE_DIR}/regcomp.c
     ${CMAKE_CURRENT_SOURCE_DIR}/regenc.c
