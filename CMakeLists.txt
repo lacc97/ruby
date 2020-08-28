@@ -157,7 +157,8 @@ add_library(ruby STATIC
         Threads::Threads
         ${CMAKE_DL_LIBS}
         crypt
-        PkgConfig::BSD)
+        PkgConfig::BSD
+        $<$<PLATFORM_ID:Linux>:m>)
 
 add_executable(ruby-exe ${CMAKE_CURRENT_SOURCE_DIR}/main.c)
   target_link_libraries(ruby-exe PRIVATE ruby m)
