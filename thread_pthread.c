@@ -467,10 +467,27 @@ static rb_thread_t *register_cached_thread_and_wait(void);
 #define STACKADDR_AVAILABLE 1
 #elif defined HAVE_PTHREAD_GET_STACKADDR_NP && defined HAVE_PTHREAD_GET_STACKSIZE_NP
 #define STACKADDR_AVAILABLE 1
+#undef MAINSTACKADDR_AVAILABLE
+#define MAINSTACKADDR_AVAILABLE 1
+void *pthread_get_stackaddr_np(pthread_t);
+size_t pthread_get_stacksize_np(pthread_t);
 #elif defined HAVE_THR_STKSEGMENT || defined HAVE_PTHREAD_STACKSEG_NP
 #define STACKADDR_AVAILABLE 1
 #elif defined HAVE_PTHREAD_GETTHRDS_NP
 #define STACKADDR_AVAILABLE 1
+#elif defined __HAIKU__
+#define STACKADDR_AVAILABLE 1
+#endif
+
+#ifndef MAINSTACKADDR_AVAILABLE
+# ifdef STACKADDR_AVAILABLE
+#   define MAINSTACKADDR_AVAILABLE 1
+# else
+#   define MAINSTACKADDR_AVAILABLE 0
+# endif
+#endif
+#if MAINSTACKADDR_AVAILABLE && !defined(get_main_stack)
+# define get_main_stack(addr, size) get_stack(addr, size)
 #endif
 
 #ifdef STACKADDR_AVAILABLE
@@ -555,48 +572,147 @@ static struct {
 extern void *STACK_END_ADDRESS;
 #endif
 
-#undef ruby_init_stack
-void
-ruby_init_stack(volatile VALUE *addr
-#ifdef __ia64
-    , void *bsp
-#endif
-    )
+#ifdef __linux__
+static __attribute__((noinline)) void
+reserve_stack(volatile char *limit, size_t size)
 {
-    native_main_thread.id = pthread_self();
-#ifdef STACK_END_ADDRESS
-    native_main_thread.stack_start = STACK_END_ADDRESS;
+# ifdef C_ALLOCA
+#   error needs alloca()
+# endif
+  struct rlimit rl;
+  volatile char buf[0x100];
+  enum {stack_check_margin = 0x1000}; /* for -fstack-check */
+
+  STACK_GROW_DIR_DETECTION;
+
+  if (!getrlimit(RLIMIT_STACK, &rl) && rl.rlim_cur == RLIM_INFINITY)
+    return;
+
+  if (size < stack_check_margin) return;
+  size -= stack_check_margin;
+
+  size -= sizeof(buf); /* margin */
+  if (IS_STACK_DIR_UPPER()) {
+    const volatile char *end = buf + sizeof(buf);
+    limit += size;
+    if (limit > end) {
+      /* |<-bottom (=limit(a))                                     top->|
+       * | .. |<-buf 256B |<-end                          | stack check |
+       * |  256B  |              =size=                   | margin (4KB)|
+       * |              =size=         limit(b)->|  256B  |             |
+       * |                |       alloca(sz)     |        |             |
+       * | .. |<-buf      |<-limit(c)    [sz-1]->0>       |             |
+       */
+      size_t sz = limit - end;
+      limit = alloca(sz);
+      limit[sz-1] = 0;
+    }
+  }
+  else {
+    limit -= size;
+    if (buf > limit) {
+      /* |<-top (=limit(a))                                     bottom->|
+       * | .. | 256B buf->|                               | stack check |
+       * |  256B  |              =size=                   | margin (4KB)|
+       * |              =size=         limit(b)->|  256B  |             |
+       * |                |       alloca(sz)     |        |             |
+       * | .. |      buf->|           limit(c)-><0>       |             |
+       */
+      size_t sz = buf - limit;
+      limit = alloca(sz);
+      limit[0] = 0;
+    }
+  }
+}
 #else
-    if (!native_main_thread.stack_start ||
+# define reserve_stack(limit, size) ((void)(limit), (void)(size))
+#endif
+
+#undef ruby_init_stack
+/* Set stack bottom of Ruby implementation.
+ *
+ * You must call this function before any heap allocation by Ruby implementation.
+ * Or GC will break living objects */
+void
+ruby_init_stack(volatile VALUE *addr)
+{
+  native_main_thread.id = pthread_self();
+
+#if MAINSTACKADDR_AVAILABLE
+  if (native_main_thread.stack_maxsize) return;
+    {
+	void* stackaddr;
+	size_t size;
+	if (get_main_stack(&stackaddr, &size) == 0) {
+	    native_main_thread.stack_maxsize = size;
+	    native_main_thread.stack_start = stackaddr;
+	    reserve_stack(stackaddr, size);
+	    goto bound_check;
+	}
+    }
+#endif
+#ifdef STACK_END_ADDRESS
+  native_main_thread.stack_start = STACK_END_ADDRESS;
+#else
+  if (!native_main_thread.stack_start ||
         STACK_UPPER((VALUE *)(void *)&addr,
                     native_main_thread.stack_start > addr,
                     native_main_thread.stack_start < addr)) {
         native_main_thread.stack_start = (VALUE *)addr;
     }
 #endif
-#ifdef __ia64
-    if (!native_main_thread.register_stack_start ||
-        (VALUE*)bsp < native_main_thread.register_stack_start) {
-        native_main_thread.register_stack_start = (VALUE*)bsp;
-    }
+  {
+#if defined(HAVE_GETRLIMIT)
+#if defined(PTHREAD_STACK_DEFAULT)
+    # if PTHREAD_STACK_DEFAULT < RUBY_STACK_SPACE*5
+#  error "PTHREAD_STACK_DEFAULT is too small"
+# endif
+	size_t size = PTHREAD_STACK_DEFAULT;
+#else
+    size_t size = RUBY_VM_THREAD_STACK_SIZE*sizeof(VALUE);
 #endif
-    {
-	size_t size = 0;
-	size_t space = 0;
-#if defined(STACKADDR_AVAILABLE)
-	void* stackaddr;
-	STACK_GROW_DIR_DETECTION;
-	get_stack(&stackaddr, &size);
-	space = STACK_DIR_UPPER((char *)addr - (char *)stackaddr, (char *)stackaddr - (char *)addr);
-#elif defined(HAVE_GETRLIMIT)
-	struct rlimit rlim;
-	if (getrlimit(RLIMIT_STACK, &rlim) == 0) {
-	    size = (size_t)rlim.rlim_cur;
-	}
-	space = size > 5 * 1024 * 1024 ? 1024 * 1024 : size / 5;
-#endif
-	native_main_thread.stack_maxsize = size - space;
+    size_t space;
+    int pagesize = getpagesize();
+    struct rlimit rlim;
+    STACK_GROW_DIR_DETECTION;
+    if (getrlimit(RLIMIT_STACK, &rlim) == 0) {
+      size = (size_t)rlim.rlim_cur;
     }
+    addr = native_main_thread.stack_start;
+    if (IS_STACK_DIR_UPPER()) {
+      space = ((size_t)((char *)addr + size) / pagesize) * pagesize - (size_t)addr;
+    }
+    else {
+      space = (size_t)addr - ((size_t)((char *)addr - size) / pagesize + 1) * pagesize;
+    }
+    native_main_thread.stack_maxsize = space;
+#endif
+  }
+
+#if MAINSTACKADDR_AVAILABLE
+  bound_check:
+#endif
+  /* If addr is out of range of main-thread stack range estimation,  */
+  /* it should be on co-routine (alternative stack). [Feature #2294] */
+  {
+    void *start, *end;
+    STACK_GROW_DIR_DETECTION;
+
+    if (IS_STACK_DIR_UPPER()) {
+      start = native_main_thread.stack_start;
+      end = (char *)native_main_thread.stack_start + native_main_thread.stack_maxsize;
+    }
+    else {
+      start = (char *)native_main_thread.stack_start - native_main_thread.stack_maxsize;
+      end = native_main_thread.stack_start;
+    }
+
+    if ((void *)addr < start || (void *)addr > end) {
+      /* out of range */
+      native_main_thread.stack_start = (VALUE *)addr;
+      native_main_thread.stack_maxsize = 0; /* unknown */
+    }
+  }
 }
 
 #define CHECK_ERR(expr) \
