@@ -27,6 +27,12 @@
 #include <sys/types.h>
 #include <assert.h>
 
+#if defined(__clang__) || defined (__GNUC__)
+# define ATTRIBUTE_NO_ADDRESS_SAFETY_ANALYSIS __attribute__((no_address_safety_analysis)) __attribute__((noinline))
+#else
+# define ATTRIBUTE_NO_ADDRESS_SAFETY_ANALYSIS
+#endif
+
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
@@ -1538,6 +1544,7 @@ is_pointer_to_heap(rb_objspace_t *objspace, void *ptr)
     return FALSE;
 }
 
+ATTRIBUTE_NO_ADDRESS_SAFETY_ANALYSIS
 static void
 mark_locations_array(rb_objspace_t *objspace, register VALUE *x, register long n)
 {
