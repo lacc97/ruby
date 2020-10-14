@@ -22,6 +22,12 @@
 #include <setjmp.h>
 #include <sys/types.h>
 
+#if defined(__clang__) || defined (__GNUC__)
+# define ATTRIBUTE_NO_ADDRESS_SAFETY_ANALYSIS __attribute__((no_address_safety_analysis)) __attribute__((noinline))
+#else
+# define ATTRIBUTE_NO_ADDRESS_SAFETY_ANALYSIS
+#endif
+
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
@@ -672,6 +678,7 @@ is_pointer_to_heap(ptr)
     return Qfalse;
 }
 
+ATTRIBUTE_NO_ADDRESS_SAFETY_ANALYSIS
 static void
 mark_locations_array(x, n)
     register VALUE *x;
